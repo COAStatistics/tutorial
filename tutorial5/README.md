@@ -206,10 +206,43 @@ class Citizen(models.Model)
 當`City`被刪除時，`Citizen`的`relate_city`欄位會變成`null`，需另外設定`null=True`  
 
 `on_delete=models.SET_DEFAULT`  
-需另外設定`default`參數，當所關聯的`City`被刪除時，自動將此欄位關聯至`default`指定的主鍵。
+需另外設定`default`參數，當所關聯的`City`被刪除時，自動將此欄位關聯至`default`指定的關聯表主鍵。  
 
+假設今天有下列2張表，`Citizen`的`relate_city`設定為`relate_city = models.ForeignKey(City, on_delete=models.SET_DEFAULT, default=0)`  
+根據`Citizen`可得知`阿哲`住在台北市，`阿倫`、`阿燦`住在新北市，`阿龍`、`阿德`、`阿花`住在桃園市。  
+City|
+-----|--------
+id(pk)|0|1|2
+name|台北市|新北市|桃園市
+
+Citizen|
+---|---
+id(pk)|0|1|2|3|4|5
+relate_city|0|1|1|2|2|2
+name|阿哲|阿倫|阿燦|阿龍|阿德|阿花
+age|58|57|51|54|58|68
+
+如果把`City`的桃園市刪除，`阿龍`、`阿德`、`阿花`將無家可歸，還好我們設定了`default=0`，`阿龍`、`阿德`、`阿花`在桃園市被刪除後，都會搬到台北市居住，變成下表  
+City|
+-----|--------
+id|0|1
+name|台北市|新北市
+
+Citizen|
+---|---
+id|0|1|2|3|4|5
+relate_city|0|1|1|0|0|0
+name|阿哲|阿倫|阿燦|阿龍|阿德|阿花
+age|58|57|51|54|58|68
+注意，因為台北市被指定為`default`，所以台北市不可被刪除  
 
 `on_delete=models.SET()`  
+關聯的資料被刪除時，呼叫`SET()`內的涵式，回傳另外一個關聯物件  
+例如設定`relate_city = models.ForeignKey(City, on_delete=models.SET(get_first_city)`  
+並且有一個涵式如下  
+```
+
+```
 
 `on_delete=models.DO_NOTHING`  
   

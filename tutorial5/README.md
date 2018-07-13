@@ -21,13 +21,13 @@ def \_\_str\_\_(self):
   
   
 #### 文字類型  
-1. ##### models.CharField(max_length=255)  
+1. ##### models.CharField(max_length=255)
 字元字串欄位，`max_length`是必要的參數，上限為255  
   
-2. ##### models.TextField()  
+2. ##### models.TextField()
 為一個文字框輸入欄位，若`CharField`長度超過255則使用此類型，可以加上`max_length`參數，但只作用在`client`端，`model`及`database`不起作用。  
   
-3. ##### models.EmailField()  
+3. ##### models.EmailField()
 電子郵件欄位，若不給參數，預設參數為`max_length=254`  
   
 #### 整數類型  

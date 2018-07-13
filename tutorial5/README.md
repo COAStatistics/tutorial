@@ -4,8 +4,11 @@
 下面將會介紹`models`的  
 Fields  
 Options  
+Relationships  
 class Meta  
-def \_\_str\_\_(self):
+def \_\_str\_\_(self):  
+  
+  
   
 ## Fields  
 每個`models`的`Field`分別對應到不同的資料庫欄位型態  
@@ -16,39 +19,48 @@ def \_\_str\_\_(self):
 日期類型:`DateField`、`DateTimeField`  
 布林類型:`BooleanField`、`NullBooleanField`  
   
+  
 #### 文字類型  
 1. ##### models.CharField(max_length=255)  
-`max_length`是必要的參數，上限為255  
+字元字串欄位，`max_length`是必要的參數，上限為255  
+  
 2. ##### models.TextField()  
 為一個文字框輸入欄位，若`CharField`長度超過255則使用此類型，可以加上`max_length`參數，但只作用在`client`端，`model`及`database`不起作用。  
+  
 3. ##### models.EmailField()  
-若不給參數，預設參數為`max_length=254`  
+電子郵件欄位，若不給參數，預設參數為`max_length=254`  
   
 #### 整數類型  
 1. ##### models.IntegerField()  
 整數類型欄位，值的範圍為`-2147483648`至`2147483647`  
+  
 2. ##### models.BigIntegerField()  
 64位元整數欄位，值的範圍為`-9223372036854775808`至`9223372036854775807`  
+  
 3. ##### models.PositiveIntegerField()  
 正整數欄位，值的範圍為`0`至`2147483647`  
+  
 4. ##### models.PositiveSmallIntegerField()  
 小正整數欄位，值的範圍為`0`至`32767`  
-
+  
+  
 #### 小數類型  
 1. ##### models.FloatField()  
 浮點數欄位，因為精度問題，在數字計算上可能會有誤差。  
+  
 2. ##### models.DecimalField(max_digits=10, decimal_places=3)  
 十進制欄位，通常使用在計算不可有誤差的地方，如:金額。  
 需要`max_digits`及`decimal_places`這2個參數。  
 `max_digits`表示此欄位允許的最大位數  
 `decimal_places`表示使用幾個位數顯示小數部分  
-`12345.67`有7位數，小數部分3位數  
-`models.DecimalField(max_digits=7, decimal_places=3)`  
-
-
+`12345.67`有7位數，小數部分2位數  
+`models.DecimalField(max_digits=7, decimal_places=2)`  
+  
+  
 #### 日期類型  
 1. ##### models.DateField()  
 使用`python`的`datetime.date`為實例來表示`年-月-日`  
+  
 2. ##### models.DateTimeField()  
 使用`python`的`datetime.datetime`為實例來表示`年-月-日 時:分:秒`  
 2個日期類型都有`auto_now`及`auto_now_add`2個可選參數，預設皆為`False`。  
@@ -57,11 +69,15 @@ def \_\_str\_\_(self):
   
 若設定參數`auto_now_add=True`，日期會在資料被新增時自動加入當下的日期時間(新增時指定日期時間無效)，新增後可隨意修改日期時間，通常用在記錄資料建立的時間。  
   
+  
 #### 布林類型  
 1. ##### models.BooleanField()  
 只有`true`或`false`的資料型態，預設為`false`，如果需要接受`null`，改用`NullBooleanField`  
+  
 2. ##### models.NullBooleanField()  
 接受`true`、`false`、`null`3種資料型態，預設為`null`，使用此類型，會自動設定`null=True`參數。  
+  
+  
   
 ## Options  
 上面介紹的每個`Field`，除了指定要給的參數為，還有一些參數可供選擇，這裡會介紹以下參數  
@@ -74,31 +90,83 @@ def \_\_str\_\_(self):
 `unique`  
 `verbose_name`  
   
+  
 ##### null  
-`name = models.CharField(max_length=10)`  
+`name = models.CharField(max_length=10, null=False)`  
 若不指定此參數，預設值為`null=False`，若設定成`null=True`，此欄位可允許存入`null`值。  
   
+  
 ##### blank  
-`name = models.CharField(max_length=10)`  
+`name = models.CharField(max_length=10, blank=False)`  
 若不指定此參數，預設值為`blank=False`，若設定成`blank=True`，此欄位可允許存入`空白`值。  
+  
   
 ##### choices  
 test  
   
+  
 ##### default  
-`name = models.CharField(max_length=10)`  
-設定`default=''`，可指定此欄位預設值為何  
+`name = models.CharField(max_length=10, default='value')`  
+設定`default`參數，可指定此欄位預設值為何  
 `default='低否'`表示此Char欄位預設值為`低否`  
+  
   
 ##### help\_text  
 test  
   
+  
 ##### primary\_key  
-test  
+id = models.PositiveIntegerField(primary_key=False)  
+`primary_key`參數指定此欄位為`table`的主鍵，通常不需額外指定此欄位，`Django`會自動新增一個`AutoField`型態的`id`欄位給`table`當主鍵。  
+
+name = models.CHarField(max_length=10, primary_key=True)  
+如果自行指定其他欄位為`primary_key`，此欄位會自動增加`null=False`及`unique=True`這2個參數。  
+  
+一張`table`只允許一個`primary_key`  
+  
   
 ##### unique  
-test  
+phone = models.PositiveIntegerField(unique=False)  
+`unique`參數預設為`False`，如果設定`unique=True`，表示此欄位所存放的值不可與其他欄位重複。  
+  
+除了`OneToOneField`及`ManyToManyField`之外，其他`Field`皆可使用此參數。
+  
   
 ##### verbose\_name  
+此參數可以給予欄位一個暱稱來顯示，若不指定此參數，`Django`會將欄位名稱的字首英文字母大寫，並將底線轉為空格。  
+  
+下面例子會以`First name`來顯示  
+first_name = models.CharField(max_length=10)  
+  
+下面例子會以`Lastname`來顯示  
+last_name = models.CHarField(max_length=10, verbose_name='lastname')  
+  
+下面例子會以`NICK_NAME`來顯示，使用此方法，必將顯示名稱放在最前端，才可不輸入`verbose_name`  
+nick_name = models.CharField('NICK_NAME', max_length=10)  
+  
+  
+  
+## Relationships  
+`Django`的`models`也支援了關聯式資料庫的`ForeignKey`、`OneToMany`、`OneToOne`、`ManyTOMany`  
+  
+  
+#### ForeignKey and OneToMany  
 test  
   
+  
+#### OneToOne  
+test  
+  
+  
+#### ManyToMany  
+test  
+  
+  
+  
+## class Meta  
+test  
+  
+  
+  
+## def \_\_str\_\_(self)  
+test  

@@ -23,11 +23,11 @@ def \_\_str\_\_(self):
 #### 文字類型  
 1. ##### CharField
 `name = models.CharField(max_length=255)`  
-字元字串欄位，`max_length`是必要的參數，上限為255  
+字元字串欄位，`max_length`是必要的參數，Django文件建議上限為255，實測結果為長度取決於資料庫上限。  
   
 2. ##### TextField
 `description = models.TextField()`  
-為一個文字框輸入欄位，若`CharField`長度超過255則使用此類型，可以加上`max_length`參數，但只作用在`client`端，`model`及`database`不起作用。  
+為一個文字框輸入欄位，Django文件建議`CharField`長度超過255則使用此類型，可以加上`max_length`參數，但只作用在`client`端，`model`及`database`不起作用。  
   
 3. ##### EmailField
 `email = models.EmailField()`  
@@ -125,7 +125,8 @@ test
   
   
 ##### help\_text  
-test  
+`name = models.CHarField(max_length=20, help_text='This is help text.'`  
+當此欄位使用在`form`表單時，給予輸入的幫助訊息。  
   
   
 ##### primary\_key  
@@ -170,9 +171,9 @@ test
 假設有2張表，1張記錄城市名稱，1張記錄城市居民，關聯如下圖  
 ```mermaid
 graph LR
-A[City] --> B[Citizen]
-A[City] --> C[Citizen]
-A[City] --> D[Citizen]
+B[Citizen] --> A[City]
+C[Citizen] --> A[City]
+D[Citizen] --> A[City]
 ```  
 城市的`model`如下
 ```
@@ -237,9 +238,9 @@ age|58|57|51|54|58|68
 注意，因為台北市被指定為`default`，所以台北市不可被刪除  
 
 `on_delete=models.SET()`  
-關聯的資料被刪除時，呼叫`SET()`內的涵式，回傳另外一個關聯物件  
+關聯的資料被刪除時，呼叫`SET()`內的函式，回傳另外一個關聯物件  
 例如設定`relate_city = models.ForeignKey(City, on_delete=models.SET(get_first_city)`  
-並且有一個涵式如下  
+並且有一個函式如下  
 ```
 
 ```
@@ -248,18 +249,79 @@ age|58|57|51|54|58|68
   
   
 #### OneToOne  
-test  
+`relation = models.OneToOneField(relate_model_name, on_delete=models.CASCADE)`  
+資料庫中的一對一關係，與`ForeignKey`加上`unique`相似，差別在於反向關係時，`OneToOne`回傳一個物件，而`ForeignKey`加上`unique`會回傳`queryset`  
+  
+如果`City`與`Citizen`是`ForeignKey`關係，`User`與`UserProfile`是`OneToOne`關係，程式碼如下：  
+```
+class City(models.Model):
+    name = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.name
+
+class Citizen(models.Model):
+    relate_city = models.ForeignKey(City, on_delete=models.CASCADE)
+    name = models.CharField(max_length=20)
+    age = models.PositiveIntegerField()
+
+    def __str__(self):
+        return self.name
+
+
+class User(models.Model):
+    uid = models.CharField(max_length=10)
+
+    def __str__(self):
+        return self.uid
+
+class UserProfile(models.Model):
+    relate_user = models.OneToOneField(User, on_delete=models.CASCADE)
+    name = models.CharField(max_length=20)
+    age = models.PositiveIntegerField()
+
+    def __str__(self):
+        return self.name
+```  
+在`command line`輸入`python manage.py shell`進入`shell`互動模式  
+```
+>>> from app import models
+>>> city = models.City.objects.get(name='Taipei')
+>>> citizen = models.Citizen.objects.get(name='ironman')
+>>> user = models.User.objects.get(uid='A123456789')
+>>> userprofile = models.UserProfile.objects.get(name='superman')
+>>> city.citizen_set.all()
+<QuerySet [<Citizen: ironman>]>
+>>> user.userprofile
+<UserProfile: superman>
+```  
   
   
 #### ManyToMany  
-test  
+To be continue...  
   
   
   
 ## class Meta  
-test  
+下方的程式碼會使`Test`在`admin`後台以`TEST`來顯示
+```
+class Test(models.Model):
+	name = models.CharField(max_length=20)
+    
+    class Meta:
+    	verbose_name = "TEST"
+    
+    def __str__(self):
+    	return self.name
+```   
   
   
   
 ## def \_\_str\_\_(self)  
-test  
+```
+class Test(models.Model):
+	name = models.CharField(max_length=20)
+    
+    def __str__(self):
+    	return self.name
+```  
